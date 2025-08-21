@@ -9,19 +9,22 @@ import {
 } from './definitions';
 import { formatCurrency } from './utils';
 
+
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+
+const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
+const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
 
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 3 seconds.');
 
     return data;
   } catch (error) {
@@ -141,6 +144,26 @@ export async function fetchInvoicesPages(query: string) {
     throw new Error('Failed to fetch total number of invoices.');
   }
 }
+export async function fetchnumberofInvoices() {
+  try {
+
+    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
+    return Number((await invoiceCountPromise)[0].count ?? '0');
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch number of invoices.');
+  }
+}
+
+export async function fetchNumberOfCustomers() {
+  try {
+    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
+    return Number((await customerCountPromise)[0].count ?? '0');
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch number of customers.');
+  }
+}
 
 export async function fetchInvoiceById(id: string) {
   try {
@@ -160,6 +183,7 @@ export async function fetchInvoiceById(id: string) {
       amount: invoice.amount / 100,
     }));
 
+    console.log(invoice); // Invoice is an empty array []
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
